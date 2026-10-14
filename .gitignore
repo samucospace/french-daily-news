@@ -1,6 +1,7 @@
 # Virtual environment
 venv/
 .env
+preview.html
 
 # Python bytecode
 __pycache__/
