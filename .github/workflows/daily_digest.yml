@@ -2,9 +2,8 @@ name: Daily French Digest & Lesson
 
 on:
   schedule:
-    # Runs daily at 21:00 UTC (e.g. 5:00 AM UTC+8 / overnight before morning wake-up)
-    # Adjust this cron expression to your preferred overnight time in UTC
-    - cron: '0 21 * * *'
+    # Runs daily at 18:00 UTC (which is 02:00 AM Singapore Time / UTC+8)
+    - cron: '0 18 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab anytime
 
 jobs:

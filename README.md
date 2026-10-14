@@ -126,13 +126,13 @@ In your GitHub repository:
 
 ### 3. Adjust the Overnight Schedule
 
-The workflow is located in [`.github/workflows/daily_digest.yml`](.github/workflows/daily_digest.yml). By default, it runs every night at **21:00 UTC** (5:00 AM UTC+8):
+The workflow is located in [`.github/workflows/daily_digest.yml`](.github/workflows/daily_digest.yml). By default, it runs every night at **18:00 UTC** (**02:00 AM Singapore Time / SGT**):
 
 ```yaml
 on:
   schedule:
-    # 21:00 UTC corresponds to early morning wake-up in UTC+8
-    - cron: '0 21 * * *'
+    # 18:00 UTC corresponds to 02:00 AM Singapore Time (UTC+8)
+    - cron: '0 18 * * *'
   workflow_dispatch: # Allows manual trigger anytime from GitHub Actions tab
 ```
 
