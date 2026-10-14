@@ -8,13 +8,17 @@ load_dotenv()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# Primary free model with Paris-native French fluency, followed by capable free backups
-DEFAULT_MODELS = [
-    "mistralai/mistral-small-3.1-24b-instruct:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "google/gemini-2.0-flash-exp:free",
-    "mistralai/mistral-7b-instruct:free"
-]
+# Active free models on OpenRouter
+# "openrouter/free" automatically load-balances across currently active free endpoints
+CUSTOM_MODEL = os.getenv("OPENROUTER_MODEL")
+DEFAULT_MODELS = [m for m in [
+    CUSTOM_MODEL,
+    "openrouter/free",
+    "google/gemma-4-31b-it:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "nvidia/nemotron-3.5-lightning:free"
+] if m]
 
 # Gmail Configuration
 GMAIL_USER = os.getenv("GMAIL_USER", "")
