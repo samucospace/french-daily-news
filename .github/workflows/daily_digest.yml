@@ -1,0 +1,37 @@
+name: Daily French Digest & Lesson
+
+on:
+  schedule:
+    # Runs daily at 21:00 UTC (e.g. 5:00 AM UTC+8 / overnight before morning wake-up)
+    # Adjust this cron expression to your preferred overnight time in UTC
+    - cron: '0 21 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab anytime
+
+jobs:
+  send-french-digest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run daily news digest & send email
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          FRENCH_LEVEL: ${{ vars.FRENCH_LEVEL || 'advanced' }}
+        run: |
+          python main.py
