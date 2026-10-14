@@ -31,7 +31,8 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS || secrets.EMAIL_RECIPIENT }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENTS || secrets.EMAIL_RECIPIENT }}
           FRENCH_LEVEL: ${{ vars.FRENCH_LEVEL || 'advanced' }}
         run: |
           python main.py

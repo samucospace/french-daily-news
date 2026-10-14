@@ -5,7 +5,8 @@ from email.mime.text import MIMEText
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 from typing import Dict, Any
-from .config import GMAIL_USER, GMAIL_APP_PASSWORD, EMAIL_RECIPIENT
+from .config import GMAIL_USER, GMAIL_APP_PASSWORD, EMAIL_RECIPIENTS
+from typing import Dict, Any, List
 
 FRENCH_MONTHS = [
     "", "janvier", "février", "mars", "avril", "mai", "juin",
@@ -33,10 +34,10 @@ def render_email_html(content: Dict[str, Any]) -> str:
     date_str = get_french_date()
     return template.render(content=content, date_str=date_str)
 
-def send_daily_email(content: Dict[str, Any], preview_file: str = None) -> bool:
+def send_daily_email(content: Dict[str, Any], preview_file: str = None, preview_only: bool = False) -> bool:
     """
-    Render and send the email via Gmail SMTP.
-    If credentials are missing and preview_file is given, write the HTML to disk for testing.
+    Render and send the email via Gmail SMTP to all configured recipients.
+    If preview_only is True, save to preview_file and return without connecting to SMTP.
     """
     html_body = render_email_html(content)
 
@@ -45,12 +46,20 @@ def send_daily_email(content: Dict[str, Any], preview_file: str = None) -> bool:
             f.write(html_body)
         print(f"[OK] Saved email preview to: {preview_file}")
 
+    if preview_only:
+        print("[Preview Mode] Skipping SMTP delivery.")
+        return True
+
     if not GMAIL_USER or not GMAIL_APP_PASSWORD:
         print("[Notice] GMAIL_USER or GMAIL_APP_PASSWORD not set. Skipping SMTP delivery.")
         print("Set these in your .env or GitHub Secrets to enable automatic emailing.")
         return False
 
-    recipient = EMAIL_RECIPIENT or GMAIL_USER
+    recipients = EMAIL_RECIPIENTS
+    if not recipients:
+        print("[Notice] No recipient email specified. Defaulting to GMAIL_USER.")
+        recipients = [GMAIL_USER]
+
     date_str = get_french_date()
     
     # Subject line
@@ -66,7 +75,7 @@ def send_daily_email(content: Dict[str, Any], preview_file: str = None) -> bool:
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = f"La Gazette Francaise <{GMAIL_USER}>"
-    msg["To"] = recipient
+    msg["To"] = ", ".join(recipients)
 
     # Fallback plain text
     plain_text = f"La Gazette du Jour - {date_str}\n\n"
@@ -79,13 +88,14 @@ def send_daily_email(content: Dict[str, Any], preview_file: str = None) -> bool:
     msg.attach(MIMEText(plain_text, "plain", "utf-8"))
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
-    print(f"-> Sending email to {recipient} via Gmail SMTP...")
+    recipients_str = ", ".join(recipients)
+    print(f"-> Sending email to {len(recipients)} recipient(s): {recipients_str} via Gmail SMTP...")
     try:
         # Connect to Gmail SMTP using SSL (port 465)
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(GMAIL_USER, GMAIL_APP_PASSWORD.replace(" ", ""))
-            server.sendmail(GMAIL_USER, [recipient], msg.as_string())
-        print(f"[OK] Email successfully sent to {recipient}!")
+            server.sendmail(GMAIL_USER, recipients, msg.as_string())
+        print(f"[OK] Email successfully sent to {recipients_str}!")
         return True
     except Exception as e:
         print(f"[Error] Failed to send email via Gmail SMTP: {e}")

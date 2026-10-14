@@ -19,7 +19,16 @@ DEFAULT_MODELS = [
 # Gmail Configuration
 GMAIL_USER = os.getenv("GMAIL_USER", "")
 GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "")
-EMAIL_RECIPIENT = os.getenv("EMAIL_RECIPIENT", GMAIL_USER)
+
+# Support single or comma/semicolon-separated multiple recipients
+def parse_recipients() -> list[str]:
+    raw = os.getenv("EMAIL_RECIPIENTS") or os.getenv("EMAIL_RECIPIENT") or GMAIL_USER
+    if not raw:
+        return []
+    import re
+    return [email.strip() for email in re.split(r"[,;]+", raw) if email.strip()]
+
+EMAIL_RECIPIENTS = parse_recipients()
 
 # French settings
 FRENCH_LEVEL = os.getenv("FRENCH_LEVEL", "advanced")

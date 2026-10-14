@@ -79,7 +79,7 @@ def main():
     preview_path = args.output if args.preview else None
     
     print("3. Rendu et distribution de l'e-mail...")
-    send_daily_email(content, preview_file=preview_path)
+    send_daily_email(content, preview_file=preview_path, preview_only=args.preview)
     print("=== Opération terminée avec succès ! ===")
 
 if __name__ == "__main__":
