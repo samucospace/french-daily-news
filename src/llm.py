@@ -45,6 +45,8 @@ Output MUST be strictly valid JSON matching this exact schema:
 
 def extract_json(text: str) -> Dict[str, Any]:
     """Extract valid JSON from LLM response text, stripping markdown code fences if present."""
+    if not text:
+        raise ValueError("Cannot extract JSON from empty or null response.")
     text = text.strip()
     # Match ```json ... ``` or ``` ... ```
     fence_match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text)
@@ -92,7 +94,10 @@ def generate_newsletter_content(articles: List[Dict[str, str]], api_key: str = N
             
             if response.status_code == 200:
                 data = response.json()
-                raw_content = data["choices"][0]["message"]["content"]
+                msg = data["choices"][0]["message"]
+                raw_content = msg.get("content") or msg.get("reasoning")
+                if not raw_content:
+                    raise ValueError(f"Model {model} returned an empty message payload.")
                 parsed = extract_json(raw_content)
                 print(f"[OK] Successfully generated content using {model}")
                 return parsed

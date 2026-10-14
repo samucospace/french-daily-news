@@ -50,10 +50,21 @@ def send_daily_email(content: Dict[str, Any], preview_file: str = None, preview_
         print("[Preview Mode] Skipping SMTP delivery.")
         return True
 
-    if not GMAIL_USER or not GMAIL_APP_PASSWORD:
+    clean_password = GMAIL_APP_PASSWORD.strip().strip("'\"").replace(" ", "")
+    
+    if not GMAIL_USER or not clean_password:
         print("[Notice] GMAIL_USER or GMAIL_APP_PASSWORD not set. Skipping SMTP delivery.")
         print("Set these in your .env or GitHub Secrets to enable automatic emailing.")
         return False
+
+    if "your_16_char" in clean_password.lower():
+        print("[Error] GMAIL_APP_PASSWORD is still set to the placeholder text!")
+        print("Please replace it with your 16-character Google App Password in .env")
+        print("Generate one at: https://myaccount.google.com/apppasswords")
+        return False
+
+    if len(clean_password) != 16:
+        print(f"[Warning] Google App Passwords are 16 letters long (detected {len(clean_password)} chars).")
 
     recipients = EMAIL_RECIPIENTS
     if not recipients:
@@ -90,13 +101,35 @@ def send_daily_email(content: Dict[str, Any], preview_file: str = None, preview_
 
     recipients_str = ", ".join(recipients)
     print(f"-> Sending email to {len(recipients)} recipient(s): {recipients_str} via Gmail SMTP...")
+
+    # Connect via Port 587 (STARTTLS) or fallback to Port 465 (SSL)
+    server = None
     try:
-        # Connect to Gmail SMTP using SSL (port 465)
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(GMAIL_USER, GMAIL_APP_PASSWORD.replace(" ", ""))
-            server.sendmail(GMAIL_USER, recipients, msg.as_string())
+        try:
+            server = smtplib.SMTP("smtp.gmail.com", 587, timeout=15)
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+        except Exception:
+            # Fallback to SSL port 465
+            server = smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15)
+            server.ehlo()
+
+        server.login(GMAIL_USER, clean_password)
+        server.sendmail(GMAIL_USER, recipients, msg.as_string())
+        server.quit()
         print(f"[OK] Email successfully sent to {recipients_str}!")
         return True
+    except smtplib.SMTPServerDisconnected:
+        print("[Error] Gmail closed the connection unexpectedly.")
+        print("This typically means Google rejected the login credentials.")
+        print("Make sure you are using an official 16-character Google App Password (not your normal Google account password).")
+        print("Create one here: https://myaccount.google.com/apppasswords")
+        return False
+    except smtplib.SMTPAuthenticationError as e:
+        print(f"[Error] Gmail authentication failed: {e}")
+        print("Verify your GMAIL_USER and 16-character GMAIL_APP_PASSWORD.")
+        return False
     except Exception as e:
         print(f"[Error] Failed to send email via Gmail SMTP: {e}")
         raise e
