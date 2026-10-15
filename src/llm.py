@@ -44,15 +44,46 @@ Output MUST be strictly valid JSON matching this exact schema:
 """
 
 def extract_json(text: str) -> Dict[str, Any]:
-    """Extract valid JSON from LLM response text, stripping markdown code fences if present."""
+    """Extract valid JSON from LLM response text, stripping reasoning tags and markdown fences."""
     if not text:
         raise ValueError("Cannot extract JSON from empty or null response.")
-    text = text.strip()
-    # Match ```json ... ``` or ``` ... ```
-    fence_match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", text)
+    
+    # 1. Remove <think>...</think> reasoning blocks common in modern reasoning models
+    cleaned = re.sub(r"<think>[\s\S]*?</think>", "", text).strip()
+    
+    # 2. Try matching markdown code fences: ```json ... ``` or ``` ... ```
+    fence_match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", cleaned)
     if fence_match:
-        text = fence_match.group(1).strip()
-    return json.loads(text)
+        try:
+            return json.loads(fence_match.group(1).strip())
+        except Exception:
+            pass
+
+    # 3. Try matching the outermost JSON object: { ... }
+    brace_match = re.search(r"(\{[\s\S]*\})", cleaned)
+    if brace_match:
+        try:
+            return json.loads(brace_match.group(1).strip())
+        except Exception:
+            pass
+
+    # 4. Fallback to direct json.loads
+    return json.loads(cleaned)
+
+def validate_newsletter_content(data: Any) -> bool:
+    """Validate that the parsed JSON contains all required newsletter sections."""
+    if not isinstance(data, dict):
+        return False
+    news_items = data.get("news_items")
+    if not isinstance(news_items, list) or len(news_items) == 0:
+        return False
+    first = news_items[0]
+    if not isinstance(first, dict) or not first.get("title_fr") or not first.get("summary_fr"):
+        return False
+    lesson = data.get("lesson_of_the_day")
+    if not isinstance(lesson, dict) or not lesson.get("paragraph"):
+        return False
+    return True
 
 def generate_newsletter_content(articles: List[Dict[str, str]], api_key: str = None) -> Dict[str, Any]:
     """
@@ -65,7 +96,7 @@ def generate_newsletter_content(articles: List[Dict[str, str]], api_key: str = N
     headers = {
         "Authorization": f"Bearer {key}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://github.com/french-practice-daily",
+        "HTTP-Referer": "https://github.com/samucospace/french-daily-news",
         "X-Title": "French Practice Daily Newsletter"
     }
 
@@ -99,7 +130,10 @@ def generate_newsletter_content(articles: List[Dict[str, str]], api_key: str = N
                 if not raw_content:
                     raise ValueError(f"Model {model} returned an empty message payload.")
                 parsed = extract_json(raw_content)
-                print(f"[OK] Successfully generated content using {model}")
+                if not validate_newsletter_content(parsed):
+                    keys_found = list(parsed.keys()) if isinstance(parsed, dict) else type(parsed).__name__
+                    raise ValueError(f"Model {model} returned incomplete content schema: found keys {keys_found}")
+                print(f"[OK] Successfully generated complete newsletter using {model}")
                 return parsed
             else:
                 print(f"[Warning] Model {model} returned status {response.status_code}: {response.text}")

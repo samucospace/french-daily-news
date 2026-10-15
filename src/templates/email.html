@@ -223,6 +223,7 @@
       {% endif %}
 
       <!-- Section Actualités -->
+      {% if content.news_items %}
       <div class="section-title">🌍 L'Actualité Internationale</div>
       {% for item in content.news_items %}
       <div class="news-card">
@@ -233,6 +234,7 @@
         {% endif %}
       </div>
       {% endfor %}
+      {% endif %}
 
       <!-- Section Vocabulaire -->
       {% if content.vocabulary %}

@@ -39,6 +39,11 @@ def send_daily_email(content: Dict[str, Any], preview_file: str = None, preview_
     Render and send the email via Gmail SMTP to all configured recipients.
     If preview_only is True, save to preview_file and return without connecting to SMTP.
     """
+    if not isinstance(content, dict) or not content.get("news_items"):
+        error_msg = f"Cannot dispatch newsletter: 'news_items' is missing or empty (keys: {list(content.keys()) if isinstance(content, dict) else 'none'})"
+        print(f"[Error] {error_msg}")
+        raise ValueError(error_msg)
+
     html_body = render_email_html(content)
 
     if preview_file:
