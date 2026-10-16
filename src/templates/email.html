@@ -3,234 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Le Courrier Français - {{ date_str }}</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #f4f6f9;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      color: #24292e;
-      -webkit-font-smoothing: antialiased;
-    }
-    .container {
-      max-width: 640px;
-      margin: 24px auto;
-      background: #ffffff;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-      border: 1px solid #e1e4e8;
-    }
-    .header {
-      background: linear-gradient(135deg, #0d2b45 0%, #203c56 100%);
-      color: #ffffff;
-      padding: 32px 28px;
-      text-align: center;
-      border-bottom: 4px solid #d99b26;
-    }
-    .header-tag {
-      display: inline-block;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-size: 11px;
-      font-weight: 700;
-      color: #ffd166;
-      margin-bottom: 8px;
-    }
-    .header h1 {
-      margin: 0;
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
-    .header .subtitle {
-      margin-top: 8px;
-      font-size: 14px;
-      color: #b0c4de;
-    }
-    .content {
-      padding: 28px 24px;
-    }
-    .greeting {
-      font-size: 16px;
-      font-style: italic;
-      color: #4a5568;
-      margin-bottom: 24px;
-      line-height: 1.6;
-      border-left: 3px solid #203c56;
-      padding-left: 14px;
-    }
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #0d2b45;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 28px 0 16px 0;
-      display: flex;
-      align-items: center;
-      border-bottom: 2px solid #edf2f7;
-      padding-bottom: 8px;
-    }
-    .news-card {
-      background: #fafbfc;
-      border: 1px solid #e1e4e8;
-      border-radius: 8px;
-      padding: 18px;
-      margin-bottom: 16px;
-    }
-    .news-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #1a202c;
-      margin: 0 0 8px 0;
-      line-height: 1.4;
-    }
-    .news-summary {
-      font-size: 14.5px;
-      line-height: 1.6;
-      color: #374151;
-      margin: 0;
-    }
-    .news-source {
-      display: inline-block;
-      margin-top: 10px;
-      font-size: 11px;
-      color: #6b7280;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .vocab-card {
-      background: #fdfbf7;
-      border: 1px solid #f3e8d2;
-      border-left: 4px solid #d99b26;
-      border-radius: 6px;
-      padding: 14px 16px;
-      margin-bottom: 12px;
-    }
-    .vocab-term {
-      font-weight: 700;
-      font-size: 15px;
-      color: #8b5a00;
-    }
-    .vocab-trans {
-      font-size: 13px;
-      color: #555;
-      margin-left: 8px;
-      font-style: italic;
-    }
-    .vocab-def {
-      font-size: 13.5px;
-      color: #374151;
-      margin: 6px 0 4px 0;
-      line-height: 1.5;
-    }
-    .vocab-example {
-      font-size: 13px;
-      color: #4b5563;
-      font-style: italic;
-      background: rgba(217, 155, 38, 0.08);
-      padding: 6px 10px;
-      border-radius: 4px;
-      margin-top: 6px;
-    }
-    .lesson-box {
-      background: #eef4f9;
-      border: 1px solid #c7d9e8;
-      border-radius: 8px;
-      padding: 20px;
-      margin-top: 16px;
-    }
-    .lesson-topic {
-      font-size: 16px;
-      font-weight: 700;
-      color: #0d2b45;
-      margin: 0 0 10px 0;
-    }
-    .lesson-paragraph {
-      font-size: 14.5px;
-      line-height: 1.7;
-      color: #1f2937;
-      margin: 0;
-    }
-    .challenge-box {
-      background: #f7fafc;
-      border: 1px dashed #cbd5e1;
-      border-radius: 8px;
-      padding: 18px;
-      margin-top: 20px;
-    }
-    .challenge-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #475569;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-    .challenge-question {
-      font-size: 14px;
-      font-weight: 600;
-      color: #1e293b;
-      margin-bottom: 12px;
-    }
-    .challenge-details summary {
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      color: #2563eb;
-      outline: none;
-    }
-    .challenge-answer {
-      margin-top: 8px;
-      font-size: 13px;
-      line-height: 1.5;
-      color: #334155;
-      background: #ffffff;
-      padding: 10px;
-      border-radius: 4px;
-      border: 1px solid #e2e8f0;
-    }
-    .footer {
-      background: #f8fafc;
-      padding: 20px 24px;
-      text-align: center;
-      font-size: 12px;
-      color: #94a3b8;
-      border-top: 1px solid #e2e8f0;
-    }
-    .footer a {
-      color: #64748b;
-      text-decoration: underline;
-    }
-  </style>
+  <title>La Gazette du Jour - {{ date_str }}</title>
 </head>
-<body>
-  <div class="container">
+<body style="margin: 0; padding: 0; background-color: #f4f6f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #24292e; -webkit-font-smoothing: antialiased;">
+
+  <!-- Preheader text (anti-trimming for Gmail & mobile inbox preview) -->
+  <div style="display: none; font-size: 1px; color: #ffffff; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all;">
+    {% if content.news_items and content.news_items[0] %}{{ content.news_items[0].title_fr }}{% else %}Votre édition quotidienne de français{% endif %} &mdash; {{ date_str }} [Ref: {{ unique_id }}]
+  </div>
+
+  <div style="max-width: 640px; margin: 24px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e1e4e8;">
+    
     <!-- En-tête -->
-    <div class="header">
-      <div class="header-tag">Édition Quotidienne • Niveau Avancé (C1/C2)</div>
-      <h1>La Gazette Internationale &amp; Linguistique</h1>
-      <div class="subtitle">{{ date_str }}</div>
+    <div style="background-color: #0d2b45; background: linear-gradient(135deg, #0d2b45 0%, #203c56 100%); color: #ffffff; padding: 32px 28px; text-align: center; border-bottom: 4px solid #d99b26;">
+      <div style="display: inline-block; text-transform: uppercase; letter-spacing: 2px; font-size: 11px; font-weight: 700; color: #ffd166; margin-bottom: 8px;">
+        Édition Quotidienne &bull; Niveau Avancé (C1/C2)
+      </div>
+      <h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #ffffff;">
+        La Gazette Internationale &amp; Linguistique
+      </h1>
+      <div style="margin-top: 8px; font-size: 14px; color: #b0c4de;">
+        {{ date_str }}
+      </div>
     </div>
 
-    <div class="content">
+    <!-- Corps de la newsletter -->
+    <div style="padding: 28px 24px; background-color: #ffffff;">
+      
       <!-- Salutation -->
       {% if content.greeting %}
-      <div class="greeting">{{ content.greeting }}</div>
+      <div style="font-size: 15.5px; font-style: italic; color: #4a5568; margin-bottom: 24px; line-height: 1.6; border-left: 3px solid #203c56; padding-left: 14px;">
+        {{ content.greeting }}
+      </div>
       {% endif %}
 
       <!-- Section Actualités -->
       {% if content.news_items %}
-      <div class="section-title">🌍 L'Actualité Internationale</div>
+      <div style="font-size: 17px; font-weight: 700; color: #0d2b45; text-transform: uppercase; letter-spacing: 0.5px; margin: 28px 0 16px 0; border-bottom: 2px solid #edf2f7; padding-bottom: 8px;">
+        🌍 L'Actualité Internationale
+      </div>
+      
       {% for item in content.news_items %}
-      <div class="news-card">
-        <h3 class="news-title">{{ item.title_fr }}</h3>
-        <p class="news-summary">{{ item.summary_fr }}</p>
+      <div style="background-color: #fafbfc; border: 1px solid #e1e4e8; border-radius: 8px; padding: 18px; margin-bottom: 16px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: #1a202c; margin: 0 0 8px 0; line-height: 1.4;">
+          {{ item.title_fr }}
+        </h3>
+        <p style="font-size: 14.5px; line-height: 1.6; color: #374151; margin: 0;">
+          {{ item.summary_fr }}
+        </p>
         {% if item.source %}
-        <span class="news-source">Source : {{ item.source }}</span>
+        <div style="margin-top: 10px; font-size: 11px; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+          Source : {{ item.source }}
+        </div>
         {% endif %}
       </div>
       {% endfor %}
@@ -238,14 +62,27 @@
 
       <!-- Section Vocabulaire -->
       {% if content.vocabulary %}
-      <div class="section-title">📖 Lexique &amp; Tournures Choisies</div>
+      <div style="font-size: 17px; font-weight: 700; color: #0d2b45; text-transform: uppercase; letter-spacing: 0.5px; margin: 28px 0 16px 0; border-bottom: 2px solid #edf2f7; padding-bottom: 8px;">
+        📖 Lexique &amp; Tournures Choisies
+      </div>
+      
       {% for vocab in content.vocabulary %}
-      <div class="vocab-card">
-        <span class="vocab-term">{{ vocab.term }}</span>
-        <span class="vocab-trans">({{ vocab.translation_en }})</span>
-        <div class="vocab-def">{{ vocab.definition_fr }}</div>
+      <div style="background-color: #fdfbf7; border: 1px solid #f3e8d2; border-left: 4px solid #d99b26; border-radius: 6px; padding: 14px 16px; margin-bottom: 12px;">
+        <div>
+          <span style="font-weight: 700; font-size: 15px; color: #8b5a00;">{{ vocab.term }}</span>
+          {% if vocab.translation_en %}
+          <span style="font-size: 13px; color: #555555; margin-left: 8px; font-style: italic;">({{ vocab.translation_en }})</span>
+          {% endif %}
+        </div>
+        {% if vocab.definition_fr %}
+        <div style="font-size: 13.5px; color: #374151; margin: 6px 0 4px 0; line-height: 1.5;">
+          {{ vocab.definition_fr }}
+        </div>
+        {% endif %}
         {% if vocab.example_sentence %}
-        <div class="vocab-example">« {{ vocab.example_sentence }} »</div>
+        <div style="font-size: 13px; color: #4b5563; font-style: italic; background-color: #fef8ee; padding: 6px 10px; border-radius: 4px; margin-top: 6px;">
+          &laquo; {{ vocab.example_sentence }} &raquo;
+        </div>
         {% endif %}
       </div>
       {% endfor %}
@@ -253,33 +90,48 @@
 
       <!-- Section Leçon du Jour -->
       {% if content.lesson_of_the_day %}
-      <div class="section-title">💡 La Leçon de Langue du Jour</div>
-      <div class="lesson-box">
-        <div class="lesson-topic">{{ content.lesson_of_the_day.topic }}</div>
-        <p class="lesson-paragraph">{{ content.lesson_of_the_day.paragraph }}</p>
+      <div style="font-size: 17px; font-weight: 700; color: #0d2b45; text-transform: uppercase; letter-spacing: 0.5px; margin: 28px 0 16px 0; border-bottom: 2px solid #edf2f7; padding-bottom: 8px;">
+        💡 La Leçon de Langue du Jour
+      </div>
+      <div style="background-color: #eef4f9; border: 1px solid #c7d9e8; border-radius: 8px; padding: 20px; margin-top: 14px;">
+        <div style="font-size: 16px; font-weight: 700; color: #0d2b45; margin: 0 0 10px 0;">
+          {{ content.lesson_of_the_day.topic }}
+        </div>
+        <p style="font-size: 14.5px; line-height: 1.7; color: #1f2937; margin: 0;">
+          {{ content.lesson_of_the_day.paragraph }}
+        </p>
       </div>
       {% endif %}
 
-      <!-- Section Défi du Jour -->
+      <!-- Section Défi du Jour (Email client-friendly layout) -->
       {% if content.challenge %}
-      <div class="challenge-box">
-        <div class="challenge-title">🎯 Le Défi du Jour</div>
-        <div class="challenge-question">{{ content.challenge.question }}</div>
-        <details class="challenge-details">
-          <summary>Afficher la solution</summary>
-          <div class="challenge-answer">
+      <div style="font-size: 17px; font-weight: 700; color: #0d2b45; text-transform: uppercase; letter-spacing: 0.5px; margin: 28px 0 16px 0; border-bottom: 2px solid #edf2f7; padding-bottom: 8px;">
+        🎯 Le Défi du Jour
+      </div>
+      <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 18px; margin-top: 14px;">
+        <div style="font-size: 14.5px; font-weight: 600; color: #1e293b; margin-bottom: 12px; line-height: 1.5;">
+          {{ content.challenge.question }}
+        </div>
+        
+        <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 14px; margin-top: 10px;">
+          <div style="font-size: 12px; font-weight: 700; color: #2563eb; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">
+            Correction &amp; Analyse :
+          </div>
+          <div style="font-size: 13.5px; line-height: 1.5; color: #334155;">
             {{ content.challenge.answer }}
           </div>
-        </details>
+        </div>
       </div>
       {% endif %}
+
     </div>
 
     <!-- Pied de page -->
-    <div class="footer">
+    <div style="background-color: #f8fafc; padding: 20px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; line-height: 1.5;">
       Généré automatiquement par votre agent linguistique personnel via OpenRouter.<br>
       Bonne journée et bonne pratique du français !
     </div>
+
   </div>
 </body>
 </html>

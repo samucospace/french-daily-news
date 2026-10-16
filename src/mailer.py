@@ -25,14 +25,15 @@ def get_french_date(dt: datetime = None) -> str:
     month_name = FRENCH_MONTHS[dt.month]
     return f"{day_name} {dt.day} {month_name} {dt.year}"
 
-def render_email_html(content: Dict[str, Any]) -> str:
+def render_email_html(content: Dict[str, Any], unique_id: str = None) -> str:
     """Render HTML email from Jinja2 template."""
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
     env = Environment(loader=FileSystemLoader(template_dir))
     template = env.get_template("email.html")
     
     date_str = get_french_date()
-    return template.render(content=content, date_str=date_str)
+    uid = unique_id or f"{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    return template.render(content=content, date_str=date_str, unique_id=uid)
 
 def send_daily_email(content: Dict[str, Any], preview_file: str = None, preview_only: bool = False) -> bool:
     """
@@ -44,7 +45,11 @@ def send_daily_email(content: Dict[str, Any], preview_file: str = None, preview_
         print(f"[Error] {error_msg}")
         raise ValueError(error_msg)
 
-    html_body = render_email_html(content)
+    import uuid
+    from email.utils import make_msgid
+    unique_id = uuid.uuid4().hex[:8]
+
+    html_body = render_email_html(content, unique_id=unique_id)
 
     if preview_file:
         with open(preview_file, "w", encoding="utf-8") as f:
@@ -78,20 +83,31 @@ def send_daily_email(content: Dict[str, Any], preview_file: str = None, preview_
 
     date_str = get_french_date()
     
-    # Subject line
-    first_title = ""
-    if content.get("news_items"):
-        first_title = f" : {content['news_items'][0].get('title_fr', '')}"
-        # Truncate if too long for subject
-        if len(first_title) > 60:
-            first_title = first_title[:57] + "..."
+    # Subject line with top headline up front to guarantee unique threads in Gmail
+    first_item = content["news_items"][0]
+    headline = first_item.get("title_fr", "").strip()
+    if len(headline) > 55:
+        headline = headline[:52] + "..."
 
-    subject = f"La Gazette du Jour ({date_str}){first_title}"
+    subject = f"La Gazette : {headline} ({date_str})"
+
+    # Diagnostic logging
+    print("-> Newsletter summary to dispatch:")
+    print(f"   Subject: {subject}")
+    print(f"   News items count: {len(content.get('news_items', []))}")
+    for idx, item in enumerate(content.get("news_items", []), 1):
+        print(f"     {idx}. {item.get('title_fr')}")
+    print(f"   Lesson topic: {content.get('lesson_of_the_day', {}).get('topic')}")
+    print(f"   Vocabulary count: {len(content.get('vocabulary', []))}")
+    print(f"   HTML payload size: {len(html_body)} bytes")
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = f"La Gazette Francaise <{GMAIL_USER}>"
     msg["To"] = ", ".join(recipients)
+    msg["Message-ID"] = make_msgid(domain="gazette.francophone")
+    msg["Auto-Submitted"] = "auto-generated"
+    msg["X-Entity-Ref-ID"] = unique_id
 
     # Fallback plain text
     plain_text = f"La Gazette du Jour - {date_str}\n\n"

@@ -27,6 +27,7 @@ jobs:
 
       - name: Run daily news digest & send email
         env:
+          PYTHONUNBUFFERED: "1"
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
